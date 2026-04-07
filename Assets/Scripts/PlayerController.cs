@@ -4,15 +4,112 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Player Settings")]
+    [SerializeField] private float speed = 5f;
+    [SerializeField] private float jumpForce = 5f;
+
+    [Header("Collision Checks")]
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+
+    [SerializeField] private LayerMask wallLayer;
+    [SerializeField] private Transform wallCheck;
+    [SerializeField] private float wallCheckDistance = 0.5f;
+    public bool TouchedWall;
+    private Rigidbody2D rb;
+    private Animator anim;
+    private bool isGrounded = true;
+    private bool isFacingRight = true;
+    private bool wasTouchingWall;
+    private bool wasGrounded;
+    private bool Jump;
+    private bool DoubleJump;
     // Start is called before the first frame update
     void Start()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        wasGrounded = isGrounded;
+    }
+    private void Move()
+    {
+        float moveDirection = isFacingRight ? 1f : -1f;
+        rb.velocity = new Vector2(moveDirection * speed, rb.velocity.y);
+    }
+    private void GroundCheck()
+    {
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+    }
+    private void WallCheck()
+    {
+        bool isTouchingWall = Physics2D.OverlapCircle(wallCheck.position, wallCheckDistance, wallLayer);
+        TouchedWall = isTouchingWall;
+    }
+    private void Turn()
+    {
+        isFacingRight = !isFacingRight;
+        Vector3 localScale = transform.localScale;
+        localScale.x *= -1;
+        transform.localScale = localScale;
+    }
+    private void Jumping()
+    {
+        if (isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            Jump = true;
+            DoubleJump = false;
+            anim.SetTrigger("Jump");
+            anim.SetFloat("MoveY", rb.velocity.y);
+        }
+        else if (Jump && !DoubleJump)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            DoubleJump = true;
+            anim.SetTrigger("DoubleJump");
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        if (Input.GetButtonDown("Jump"))
+        {
+            Jumping();
+        }
+    }
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        GroundCheck();
+        WallCheck();
+        if (!wasGrounded && isGrounded)
+        {
+            anim.SetTrigger("Land");
+            Jump = false;
+            DoubleJump = false;
+        }
+        if (TouchedWall && !wasTouchingWall)
+        {
+            Turn();
+        }
+        wasGrounded = isGrounded;
+        wasTouchingWall = TouchedWall;
+        Move();
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+
+        if (wallCheck != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(wallCheck.position, wallCheckDistance);
+        }
     }
 }
