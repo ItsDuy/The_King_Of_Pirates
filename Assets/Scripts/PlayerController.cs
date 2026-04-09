@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private Transform wallCheck;
     [SerializeField] private float wallCheckDistance = 0.5f;
+    [SerializeField] private float respawnBufferTime = 0.2f;
     public bool TouchedWall;
     private Rigidbody2D rb;
     private Animator anim;
@@ -25,12 +26,16 @@ public class PlayerController : MonoBehaviour
     private bool wasGrounded;
     private bool Jump;
     private bool DoubleJump;
+    private bool initialFacingRight;
+    private float respawnBufferEndTime;
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         wasGrounded = isGrounded;
+        initialFacingRight = transform.localScale.x >= 0f;
+        isFacingRight = initialFacingRight;
     }
     private void Move()
     {
@@ -78,6 +83,19 @@ public class PlayerController : MonoBehaviour
             Jumping();
         }
     }
+
+    public void HandleRespawn()
+    {
+        isFacingRight = initialFacingRight;
+        Vector3 localScale = transform.localScale;
+        localScale.x = Mathf.Abs(localScale.x) * (initialFacingRight ? 1f : -1f);
+        transform.localScale = localScale;
+
+        TouchedWall = false;
+        wasTouchingWall = false;
+        respawnBufferEndTime = Time.time + respawnBufferTime;
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -89,13 +107,21 @@ public class PlayerController : MonoBehaviour
             Jump = false;
             DoubleJump = false;
         }
-        if (TouchedWall && !wasTouchingWall)
+        if (Time.time >= respawnBufferEndTime && TouchedWall && !wasTouchingWall)
         {
             Turn();
         }
         wasGrounded = isGrounded;
         wasTouchingWall = TouchedWall;
-        Move();
+
+        if (Time.time >= respawnBufferEndTime)
+        {
+            Move();
+        }
+        else
+        {
+            rb.velocity = new Vector2(0f, rb.velocity.y);
+        }
     }
 
     private void OnDrawGizmosSelected()
