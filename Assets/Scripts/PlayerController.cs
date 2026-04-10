@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private Transform wallCheck;
     [SerializeField] private float wallCheckDistance = 0.5f;
+    [SerializeField] private float wallSlideSpeed = 2f;
     [SerializeField] private float respawnBufferTime = 0.2f;
     public bool TouchedWall;
     private Rigidbody2D rb;
@@ -26,6 +27,7 @@ public class PlayerController : MonoBehaviour
     private bool wasGrounded;
     private bool Jump;
     private bool DoubleJump;
+    private bool lockMovementUntilLand;
     private bool initialFacingRight;
     private float respawnBufferEndTime;
     // Start is called before the first frame update
@@ -50,6 +52,18 @@ public class PlayerController : MonoBehaviour
     {
         bool isTouchingWall = Physics2D.OverlapCircle(wallCheck.position, wallCheckDistance, wallLayer);
         TouchedWall = isTouchingWall;
+    }
+    private void WallSlide()
+    {
+        if (TouchedWall && !isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
+            anim.SetBool("WallSlide", true);
+        }
+        else
+        {
+            anim.SetBool("WallSlide", false);   
+        }
     }
     private void Turn()
     {
@@ -93,6 +107,7 @@ public class PlayerController : MonoBehaviour
 
         TouchedWall = false;
         wasTouchingWall = false;
+        lockMovementUntilLand = false;
         respawnBufferEndTime = Time.time + respawnBufferTime;
     }
 
@@ -101,11 +116,19 @@ public class PlayerController : MonoBehaviour
     {
         GroundCheck();
         WallCheck();
+        WallSlide();
+
+        if (!isGrounded && TouchedWall)
+        {
+            lockMovementUntilLand = true;
+        }
+
         if (!wasGrounded && isGrounded)
         {
             anim.SetTrigger("Land");
             Jump = false;
             DoubleJump = false;
+            lockMovementUntilLand = false;
         }
         if (Time.time >= respawnBufferEndTime && TouchedWall && !wasTouchingWall)
         {
@@ -114,7 +137,7 @@ public class PlayerController : MonoBehaviour
         wasGrounded = isGrounded;
         wasTouchingWall = TouchedWall;
 
-        if (Time.time >= respawnBufferEndTime)
+        if (Time.time >= respawnBufferEndTime && !lockMovementUntilLand)
         {
             Move();
         }
