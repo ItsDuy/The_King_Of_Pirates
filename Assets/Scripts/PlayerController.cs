@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private float groundedStabilityTime = 0.05f;
 
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private Transform wallCheck;
@@ -29,6 +30,8 @@ public class PlayerController : MonoBehaviour
     private bool DoubleJump;
     private bool lockMovementUntilLand;
     private bool initialFacingRight;
+    private bool jumpQueued;
+    private float lastGroundedTime;
     private float respawnBufferEndTime;
     // Start is called before the first frame update
     void Start()
@@ -36,6 +39,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         wasGrounded = isGrounded;
+        lastGroundedTime = Time.time;
         initialFacingRight = transform.localScale.x >= 0f;
         isFacingRight = initialFacingRight;
     }
@@ -46,7 +50,14 @@ public class PlayerController : MonoBehaviour
     }
     private void GroundCheck()
     {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        bool rawGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        if (rawGrounded)
+        {
+            lastGroundedTime = Time.time;
+        }
+
+        isGrounded = rawGrounded || (Time.time - lastGroundedTime <= groundedStabilityTime);
     }
     private void WallCheck()
     {
@@ -79,6 +90,7 @@ public class PlayerController : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             Jump = true;
             DoubleJump = false;
+            anim.ResetTrigger("Land");
             anim.SetTrigger("Jump");
             anim.SetFloat("MoveY", rb.velocity.y);
         }
@@ -86,17 +98,12 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             DoubleJump = true;
+            anim.ResetTrigger("Land");
             anim.SetTrigger("DoubleJump");
         }
     }
 
-    private void Update()
-    {
-        if (Input.GetButtonDown("Jump"))
-        {
-            Jumping();
-        }
-    }
+    
 
     public void HandleRespawn()
     {
@@ -108,7 +115,17 @@ public class PlayerController : MonoBehaviour
         TouchedWall = false;
         wasTouchingWall = false;
         lockMovementUntilLand = false;
+        jumpQueued = false;
+        lastGroundedTime = Time.time;
         respawnBufferEndTime = Time.time + respawnBufferTime;
+    }
+
+    void Update()
+    {
+        if (Input.GetButtonDown("Jump"))
+        {
+            jumpQueued = true;
+        }
     }
 
     // Update is called once per frame
@@ -118,12 +135,18 @@ public class PlayerController : MonoBehaviour
         WallCheck();
         WallSlide();
 
+        if (jumpQueued)
+        {
+            Jumping();
+            jumpQueued = false;
+        }
+
         if (!isGrounded && TouchedWall)
         {
             lockMovementUntilLand = true;
         }
 
-        if (!wasGrounded && isGrounded)
+        if (!wasGrounded && isGrounded && rb.velocity.y <= 0.05f)
         {
             anim.SetTrigger("Land");
             Jump = false;
