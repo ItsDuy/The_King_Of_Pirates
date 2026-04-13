@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform wallCheck;
     [SerializeField] private float wallCheckDistance = 0.5f;
     [SerializeField] private float wallSlideSpeed = 2f;
+    [SerializeField] private float wallJumpHorizontalForce = 5f;
     [SerializeField] private float respawnBufferTime = 0.2f;
     public bool TouchedWall;
     private Rigidbody2D rb;
@@ -28,7 +29,7 @@ public class PlayerController : MonoBehaviour
     private bool wasGrounded;
     private bool Jump;
     private bool DoubleJump;
-    private bool lockMovementUntilLand;
+    private bool isWallSliding;
     private bool initialFacingRight;
     private bool jumpQueued;
     private float lastGroundedTime;
@@ -66,9 +67,11 @@ public class PlayerController : MonoBehaviour
     }
     private void WallSlide()
     {
-        if (TouchedWall && !isGrounded)
+        isWallSliding = TouchedWall ;
+
+        if (isWallSliding)
         {
-            rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
+            rb.velocity = new Vector2(0f, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
             anim.SetBool("WallSlide", true);
         }
         else
@@ -85,6 +88,23 @@ public class PlayerController : MonoBehaviour
     }
     private void Jumping()
     {
+        if (isWallSliding)
+        {
+            if (TouchedWall)
+            {
+                Turn();
+            }
+
+            float wallJumpDirection = isFacingRight ? 1f : -1f;
+            rb.velocity = new Vector2(wallJumpDirection * wallJumpHorizontalForce, jumpForce);
+            Jump = true;
+            DoubleJump = false;
+            anim.ResetTrigger("Land");
+            anim.SetTrigger("Jump");
+            anim.SetFloat("MoveY", rb.velocity.y);
+            return;
+        }
+
         if (isGrounded)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
@@ -114,7 +134,7 @@ public class PlayerController : MonoBehaviour
 
         TouchedWall = false;
         wasTouchingWall = false;
-        lockMovementUntilLand = false;
+        isWallSliding = false;
         jumpQueued = false;
         lastGroundedTime = Time.time;
         respawnBufferEndTime = Time.time + respawnBufferTime;
@@ -141,26 +161,16 @@ public class PlayerController : MonoBehaviour
             jumpQueued = false;
         }
 
-        if (!isGrounded && TouchedWall)
-        {
-            lockMovementUntilLand = true;
-        }
-
         if (!wasGrounded && isGrounded && rb.velocity.y <= 0.05f)
         {
             anim.SetTrigger("Land");
             Jump = false;
             DoubleJump = false;
-            lockMovementUntilLand = false;
-        }
-        if (Time.time >= respawnBufferEndTime && TouchedWall && !wasTouchingWall)
-        {
-            Turn();
         }
         wasGrounded = isGrounded;
         wasTouchingWall = TouchedWall;
 
-        if (Time.time >= respawnBufferEndTime && !lockMovementUntilLand)
+        if (Time.time >= respawnBufferEndTime)
         {
             Move();
         }

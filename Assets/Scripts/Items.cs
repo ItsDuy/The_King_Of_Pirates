@@ -6,14 +6,13 @@ public class Items : MonoBehaviour
 {
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private int id;
-    [SerializeField] private string itemName;
     [SerializeField] private enum ItemType { Potion, Coin, BlueGem, CheckPoint}
    
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (((1 << collision.gameObject.layer) & playerLayer.value) != 0)
         {
-           Debug.Log("Player collected: " + itemName);
+           Debug.Log("Player collected an item!");
         }
         switch(id)
         {
