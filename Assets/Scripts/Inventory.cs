@@ -6,5 +6,5 @@ public class Inventory : MonoBehaviour
 {
     private float coins;
     private float key;
-    private float 
+    private float blueGems;
 }
