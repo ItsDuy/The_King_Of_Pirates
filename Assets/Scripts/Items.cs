@@ -5,28 +5,49 @@ using UnityEngine;
 public class Items : MonoBehaviour
 {
     [SerializeField] private LayerMask playerLayer;
-    [SerializeField] private int id;
-    [SerializeField] private enum ItemType { Potion, Coin, BlueGem, CheckPoint}
+    [SerializeField] private ItemType itemType;
+    [SerializeField] private int amount = 1;
+
+    private enum ItemType
+    {
+        Coin,
+        BlueGem,
+        Key
+    }
    
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (((1 << collision.gameObject.layer) & playerLayer.value) != 0)
+        if (((1 << collision.gameObject.layer) & playerLayer.value) == 0)
         {
-
+            return;
         }
-        switch(id)
+
+        Inventory inventory = collision.GetComponent<Inventory>();
+        if (inventory == null)
         {
-            case 0:
+            inventory = collision.GetComponentInParent<Inventory>();
+        }
+
+        if (inventory == null)
+        {
+            return;
+        }
+
+        switch (itemType)
+        {
+            case ItemType.Coin:
+                inventory.AddCoins(amount);
                 break;
-            case 1:
+            case ItemType.BlueGem:
+                inventory.AddBlueGems(amount);
                 break;
-            case 2:
-                break;
-            case 3:
+            case ItemType.Key:
+                inventory.AddKeys(amount);
                 break;
             default:
                 break;
         }
+
         Destroy(gameObject);
     }
 }
