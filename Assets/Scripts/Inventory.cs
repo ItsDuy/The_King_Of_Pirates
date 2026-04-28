@@ -34,6 +34,20 @@ public class Inventory : MonoBehaviour
         blueGems += amount;
         UpdateUI();
     }
+    public int GetCoins()
+    {
+        return coins;
+    }
+
+    public int GetKeys()
+    {
+        return keys;
+    }
+
+    public int GetBlueGems()
+    {
+        return blueGems;
+    }
 
     private void UpdateUI()
     {
