@@ -9,6 +9,7 @@ public class Cannon : MonoBehaviour
     [SerializeField] private float fireRate = 10f; // Time in seconds between shots
     [SerializeField] private float direction = -1f; // Direction of the cannonball, -1 for left, 1 for right
     private Animator anim;
+    private float FireAnimation = 1f;
     private void Start()
     {
         anim = GetComponent<Animator>();
@@ -27,9 +28,20 @@ public class Cannon : MonoBehaviour
     }
     private void FireCannonBall()
     {
-    anim.SetTrigger("Fire");
-    var cannonBall = Instantiate(cannonBallPrefab, firePoint.position, firePoint.rotation);
-    cannonBall.GetComponent<CannonBall>().SetDirection(direction);
-    
+        StartCoroutine(FireAnimationCoroutine());
+
+        GameObject cannonBallObject = Instantiate(cannonBallPrefab, firePoint.position, firePoint.rotation);
+        CannonBall cannonBall = cannonBallObject.GetComponent<CannonBall>();
+        cannonBall.SetDirection(direction);
+    }
+
+    private IEnumerator FireAnimationCoroutine()
+    {   
+        anim.SetTrigger("Fire");
+        yield return new WaitForSeconds(FireAnimation);
+    }
+    public void ResetFireTimer(float delay)
+    {
+        nextFireTime = Time.time + delay;
     }
 }

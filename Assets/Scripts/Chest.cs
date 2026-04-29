@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Chest : MonoBehaviour
+public class Chest : MonoBehaviour, IRespawnResettable
 {
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private Inventory playerInventory; // Reference to the player's inventory
@@ -26,11 +26,13 @@ public class Chest : MonoBehaviour
                     isOpen = true;
                     // Optionally, you can add rewards or effects here when the chest is opened
                 }
-                else
-                {
-                    Debug.Log("Not enough keys to open the chest!");
-                }
-            }
+        }
         }
     }
+
+    public void ResetState()
+    {
+        isOpen = false;
+    }
 }
+

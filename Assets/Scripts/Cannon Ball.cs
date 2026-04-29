@@ -30,20 +30,34 @@ public class CannonBall : MonoBehaviour
             if (damageable != null)
             {
                 damageable.TakeDamage(damage);
-                Destroy(gameObject);
+                Despawn();
             }
         }
         
         else if (((1 << collision.gameObject.layer) & wallLayer.value) != 0)
         {
             // Optionally, you can add effects or sounds here when the cannonball hits a wall
-            Destroy(gameObject);
+            Despawn();
         }
+    }
+
+    public void Despawn()
+    {
+        Destroy(gameObject);
     }
     
 
     private void Update()
     {
         rb.velocity = new Vector2(transform.right.x * speed * direction, transform.right.y);
+    }
+
+    private void OnDisable()
+    {
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
     }
 }

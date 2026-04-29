@@ -48,6 +48,6 @@ public class Items : MonoBehaviour
                 break;
         }
 
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }
