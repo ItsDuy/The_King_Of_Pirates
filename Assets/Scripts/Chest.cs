@@ -8,7 +8,7 @@ public class Chest : MonoBehaviour, IRespawnResettable
     [SerializeField] private Inventory playerInventory; // Reference to the player's inventory
     [SerializeField] private int keyNeeded = 1; // Number of keys needed to open the chest
     private Animator anim;
-    private bool isOpen = false;
+    // private bool isOpen = false;
     private void Start()
     {
         anim = GetComponent<Animator>();
@@ -23,7 +23,7 @@ public class Chest : MonoBehaviour, IRespawnResettable
                 {
                     playerInventory.AddKeys(-keyNeeded); // Remove the required keys from the inventory
                     anim.SetTrigger("Open"); // Play the opening animation
-                    isOpen = true;
+                    // isOpen = true;
                     // Optionally, you can add rewards or effects here when the chest is opened
                 }
         }
@@ -32,7 +32,7 @@ public class Chest : MonoBehaviour, IRespawnResettable
 
     public void ResetState()
     {
-        isOpen = false;
+        // isOpen = false;
     }
 }
 

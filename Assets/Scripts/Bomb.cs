@@ -38,6 +38,10 @@ public class Bomb : MonoBehaviour, IRespawnResettable
         }
         yield return new WaitForSeconds(timeExplosion); // Wait for the specified time before dealing damage
         ExplosionDamage(); // Deal damage to nearby objects
+        if (!isExploding)
+        {
+            yield break;
+        }
         gameObject.SetActive(false);
     }
 

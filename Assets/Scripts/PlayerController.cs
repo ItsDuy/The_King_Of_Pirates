@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float wallSlideSpeed = 2f;
     [SerializeField] private float wallJumpHorizontalForce = 5f;
     [SerializeField] private float respawnBufferTime = 0.2f;
+    public ParticleSystem runDustEffect;
+
     public bool TouchedWall;
     private Rigidbody2D rb;
     private Animator anim;
@@ -95,6 +97,7 @@ public class PlayerController : MonoBehaviour
                 Turn();
             }
 
+            PlayRunDustEffect();
             float wallJumpDirection = isFacingRight ? 1f : -1f;
             rb.velocity = new Vector2(wallJumpDirection * wallJumpHorizontalForce, jumpForce);
             Jump = true;
@@ -107,6 +110,7 @@ public class PlayerController : MonoBehaviour
 
         if (isGrounded)
         {
+            PlayRunDustEffect();
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             Jump = true;
             DoubleJump = false;
@@ -163,6 +167,7 @@ public class PlayerController : MonoBehaviour
 
         if (!wasGrounded && isGrounded && rb.velocity.y <= 0.05f)
         {
+            PlayRunDustEffect();
             anim.SetTrigger("Land");
             Jump = false;
             DoubleJump = false;
@@ -178,6 +183,10 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = new Vector2(0f, rb.velocity.y);
         }
+    }
+    private void PlayRunDustEffect()
+    {
+        runDustEffect.Play();
     }
 
     private void OnDrawGizmosSelected()

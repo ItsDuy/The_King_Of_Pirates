@@ -55,6 +55,17 @@ public class GameManager : MonoBehaviour
             respawnables[i].Respawn();
         }
 
+        Bomb[] bombs = FindObjectsOfType<Bomb>(true);
+        for (int i = 0; i < bombs.Length; i++)
+        {
+            if (!bombs[i].gameObject.activeSelf)
+            {
+                bombs[i].gameObject.SetActive(true);
+            }
+
+            bombs[i].ResetState();
+        }
+
         CannonBall[] cannonBalls = FindObjectsOfType<CannonBall>(true);
         for (int i = 0; i < cannonBalls.Length; i++)
         {
