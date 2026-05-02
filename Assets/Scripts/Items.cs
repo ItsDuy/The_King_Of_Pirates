@@ -7,12 +7,19 @@ public class Items : MonoBehaviour
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private ItemType itemType;
     [SerializeField] private int amount = 1;
+    private float destroyDelay = 0.5f;
+    private Animator animator;
 
     private enum ItemType
     {
         Coin,
         BlueGem,
         Key
+    }
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>();
     }
    
     private void OnTriggerEnter2D(Collider2D collision)
@@ -47,7 +54,12 @@ public class Items : MonoBehaviour
             default:
                 break;
         }
-
-        gameObject.SetActive(false);
+        StartCoroutine(CollectItem());
+    }
+    private IEnumerator CollectItem()
+    {
+        animator.SetTrigger("isCollected");
+        yield return new WaitForSeconds(destroyDelay);
+        Destroy(gameObject);
     }
 }
