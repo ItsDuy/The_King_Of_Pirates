@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(LevelRespawnable))]
 public class Items : MonoBehaviour
 {
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private ItemType itemType;
     [SerializeField] private int amount = 1;
+    [SerializeField] private SfxManager sfxManager;
+    [SerializeField] private AudioClip collectClip;
     private float destroyDelay = 0.5f;
     private Animator animator;
 
@@ -58,8 +61,15 @@ public class Items : MonoBehaviour
     }
     private IEnumerator CollectItem()
     {
+        sfxManager.Play(collectClip);
         animator.SetTrigger("isCollected");
         yield return new WaitForSeconds(destroyDelay);
+        if (itemType == ItemType.Key)
+        {
+            gameObject.SetActive(false);
+            yield break;
+        }
+
         Destroy(gameObject);
     }
 }

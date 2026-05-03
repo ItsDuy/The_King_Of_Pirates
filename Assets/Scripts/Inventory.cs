@@ -49,6 +49,12 @@ public class Inventory : MonoBehaviour
         return blueGems;
     }
 
+    public void ResetKeys()
+    {
+        keys = 0;
+        UpdateUI();
+    }
+
     private void UpdateUI()
     {
         coinsText.text = "x" + coins;

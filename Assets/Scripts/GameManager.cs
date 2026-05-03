@@ -30,6 +30,20 @@ public class GameManager : MonoBehaviour
 
         RespawnLevelObjects();
 
+        Inventory inventory = player.GetComponent<Inventory>();
+        if (inventory == null)
+        {
+            inventory = player.GetComponentInChildren<Inventory>();
+        }
+        if (inventory == null)
+        {
+            inventory = player.GetComponentInParent<Inventory>();
+        }
+        if (inventory != null)
+        {
+            inventory.ResetKeys();
+        }
+
         Vector3 respawnPosition = spawnPoint != null ? spawnPoint.position : transform.position;
         player.transform.position = respawnPosition;
 
