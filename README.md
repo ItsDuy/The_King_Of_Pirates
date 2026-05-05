@@ -1,4 +1,4 @@
-<img width="1362" height="646" alt="image" src="https://github.com/user-attachments/assets/6da7f97c-2ff7-4655-8b32-7fcea1d7ebc6" /><img width="1354" height="650" alt="image" src="https://github.com/user-attachments/assets/2e34f91d-d92c-4d43-a0ac-9abb670f3f4d" />The King of Pirates 🏴‍☠️
+The King of Pirates 🏴‍☠️
 
 Welcome to The King of Pirates, a strategic 2D platformer and base-defense game built in Unity! Inspired by the mechanics of King of Thieves, this project was developed as a personal one-month challenge to create a polished, functional game loop from scratch.
 
